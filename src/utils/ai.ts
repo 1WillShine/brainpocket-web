@@ -3,6 +3,9 @@ export async function askAI(query: string): Promise<string> {
   // Simulate network delay
   await new Promise(resolve => setTimeout(resolve, 1000));
 
+  // 👇 Use the 'query' so TypeScript doesn't complain
+  console.log("User asked AI:", query);
+
   // Mock responses based on keywords
   const responses = [
     "That's an interesting thought. Have you considered...",
@@ -14,4 +17,4 @@ export async function askAI(query: string): Promise<string> {
   // Return a random response
   return responses[Math.floor(Math.random() * responses.length)] +
     "\n\nThis is a simulated AI response. Soon, this will be powered by GPT!";
-} 
+}
