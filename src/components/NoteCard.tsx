@@ -1,26 +1,22 @@
-import { format } from 'date-fns';
-import { useState } from 'react';
+import { format } from "date-fns";
+import { useState } from "react";
+import type { Note } from "../types";
 
 interface NoteCardProps {
-  id: string;
-  content: string;
-  tags: string[];
-  createdAt: Date;
+  note: Note;
   onDelete: (id: string) => Promise<void>;
 }
 
-export default function NoteCard({ id, content, tags, createdAt, onDelete }: NoteCardProps) {
+export default function NoteCard({ note, onDelete }: NoteCardProps) {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
 
-  const handleDelete = async () => {
-    await onDelete(id);
-    setShowDeleteConfirm(false);
-  };
+  const { id, content, tags, createdAt, type = "user" } = note;
+  const isUser = type === "user";
 
   return (
     <div 
-      className="group relative w-full max-w-2xl mx-auto pl-4"
+      className={`group relative w-full max-w-2xl mx-auto px-4 flex ${isUser ? "justify-end" : "justify-start"}`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -51,7 +47,10 @@ export default function NoteCard({ id, content, tags, createdAt, onDelete }: Not
           <p className="text-sm text-gray-600 mb-2">Delete this note?</p>
           <div className="flex gap-2">
             <button
-              onClick={handleDelete}
+              onClick={async () => {
+                await onDelete(id);
+                setShowDeleteConfirm(false);
+              }}
               className="px-3 py-1 bg-red-500 text-white text-sm rounded-md hover:bg-red-600"
             >
               Delete
@@ -66,26 +65,29 @@ export default function NoteCard({ id, content, tags, createdAt, onDelete }: Not
         </div>
       )}
 
-      {/* Note Content */}
-      <div className="bg-black text-white rounded-2xl shadow-[0_2px_12px_rgba(0,0,0,0.08)] p-6">
-        <p className="text-[15px] leading-relaxed mb-3 font-normal whitespace-pre-wrap">{content}</p>
-        
-        <div className="flex flex-wrap items-center gap-2 mt-4 pt-2 border-t border-white/10">
-          <div className="flex flex-wrap gap-1.5">
-            {tags?.map((tag, index) => (
+      {/* Note Bubble */}
+      <div className={`rounded-2xl px-4 py-3 shadow ${isUser ? "bg-black text-white" : "bg-gray-100 text-gray-800"}`}>
+        <p className="text-[15px] leading-relaxed mb-3 whitespace-pre-wrap">{content}</p>
+
+        {tags.length > 0 && (
+          <div className="flex flex-wrap items-center gap-2 mt-2 border-t pt-2 border-white/10">
+            {tags.map((tag, idx) => (
               <span
-                key={index}
-                className="px-2 py-0.5 bg-amber-400/10 text-amber-400 rounded-md text-xs font-mono"
+                key={idx}
+                className={`px-2 py-0.5 rounded-md text-xs font-mono ${
+                  isUser ? "bg-amber-400/10 text-amber-400" : "bg-gray-200 text-gray-600"
+                }`}
               >
-                #{tag.trim()}
+                #{tag}
               </span>
             ))}
+            <span className="text-xs text-gray-400 font-mono ml-auto">
+              {format(createdAt, "HH:mm · MMM d, yyyy")}
+            </span>
           </div>
-          <span className="text-xs text-gray-400 font-mono ml-auto">
-            {format(createdAt instanceof Date ? createdAt : new Date(createdAt), 'HH:mm · MMM d, yyyy')}
-          </span>
-        </div>
+        )}
       </div>
     </div>
   );
-} 
+}
+
