@@ -1,4 +1,3 @@
-// src/pages/Dashboard.tsx
 "use client"
 
 import { useEffect, useState, useRef, KeyboardEvent } from "react"
@@ -95,7 +94,6 @@ export default function Dashboard({ user }: Props) {
     const suggestions = suggestTags(value)
     setSuggestedTags(suggestions)
 
-    // Auto-resize textarea
     if (textareaRef.current) {
       textareaRef.current.style.height = "inherit"
       textareaRef.current.style.height = `${Math.min(
@@ -121,7 +119,7 @@ export default function Dashboard({ user }: Props) {
   const filteredNotes = notes.filter(
     (note) =>
       selectedTags.length === 0 ||
-      selectedTags.every((tag) => note.tags.includes(tag))
+      selectedTags.some((tag) => note.tags.includes(tag))
   )
 
   const allTags = Array.from(new Set(notes.flatMap((note) => note.tags)))
@@ -129,10 +127,15 @@ export default function Dashboard({ user }: Props) {
   return (
     <div className="flex h-screen bg-zinc-900 text-white">
       {/* Sidebar */}
-      <Sidebar activeTab={activeTab} onTabChange={setActiveTab} />
+      <Sidebar activeTab={activeTab} onTabChange={(tab) => {
+        setActiveTab(tab);
+        if (tab === 'all') {
+          setSelectedTags([]);
+        }
+      }} />
 
       {/* Main Area */}
-      <div className="flex-1 flex flex-col h-screen pl-[260px] relative">
+      <div className="flex-1 flex flex-col h-screen pl-[260px]">
         {/* Header */}
         <div className="h-14 bg-black/30 backdrop-blur-sm border-b border-white/10 flex items-center justify-between px-4 z-10">
           <h2 className="text-sm font-medium text-amber-400">
@@ -146,9 +149,9 @@ export default function Dashboard({ user }: Props) {
           </button>
         </div>
 
-        {/* Note Feed */}
-        <div className="flex-1 overflow-y-auto">
-          <div className="max-w-2xl mx-auto px-4 py-8">
+        {/* Notes Feed */}
+        <div className="flex-1 overflow-y-auto px-4 py-6">
+          <div className="max-w-2xl mx-auto space-y-6">
             {activeTab === "tags" && (
               <TagFilter
                 availableTags={allTags}
@@ -157,82 +160,87 @@ export default function Dashboard({ user }: Props) {
               />
             )}
 
-            <div className="space-y-8">
-              {filteredNotes.map((note) => (     
-               <NoteCard key={note.id} note={note} onDelete={deleteNote} />
+            {filteredNotes.map((note) => (
+              <div
+                key={note.id}
+                className={`p-4 rounded-xl max-w-[80%] ${
+                  note.type === "user"
+                    ? "bg-zinc-800 self-end ml-auto"
+                    : "bg-zinc-700 self-start"
+                }`}
+              >
+                <NoteCard note={note} onDelete={deleteNote} />
+              </div>
+            ))}
 
-
-              ))}
-              <div ref={notesEndRef} />
-            </div>
+            <div ref={notesEndRef} />
           </div>
         </div>
 
         {/* Chat Input */}
-        <div className="absolute bottom-0 left-[260px] right-0">
-          <div className="bg-gradient-to-t from-zinc-900 via-zinc-900/80 to-transparent h-32 w-full" />
-          <div className="bg-gradient-to-b from-transparent to-zinc-900 pb-8">
-            <div className="mx-auto max-w-2xl px-4">
-              <div className="relative flex flex-col bg-black/40 backdrop-blur-sm rounded-xl shadow-lg border border-white/10">
-                <textarea
-                  ref={textareaRef}
-                  className="w-full p-4 pr-20 text-white resize-none bg-transparent focus:outline-none min-h-[56px] max-h-[200px] text-[15px] placeholder:text-gray-500"
-                  placeholder="Write your note here..."
-                  rows={1}
-                  value={input}
-                  onChange={(e) => handleInputChange(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                />
+        <div className="w-full bg-zinc-900 pb-6 pt-4 border-t border-white/10">
+          <div className="max-w-2xl mx-auto px-4">
+            {/* Tag input */}
+            <input
+              type="text"
+              className="w-full mb-2 px-3 py-2 text-sm border border-white/10 rounded-md bg-black/20 text-white focus:outline-none focus:border-amber-400/50 placeholder:text-gray-500"
+              placeholder="Add tags (comma separated)..."
+              value={tagInput}
+              onChange={(e) => setTagInput(e.target.value)}
+            />
 
-                <div className="absolute right-2 bottom-2 flex items-center gap-2">
-                  <input
-                    type="text"
-                    className="px-2 py-1.5 text-xs border border-white/10 rounded-lg w-28 bg-black/20 text-white focus:outline-none focus:border-amber-400/50 placeholder:text-gray-500"
-                    placeholder="Add tags..."
-                    value={tagInput}
-                    onChange={(e) => setTagInput(e.target.value)}
-                  />
-                  <button
-                    onClick={saveNote}
-                    disabled={!input.trim()}
-                    className="p-2 bg-amber-400 text-black rounded-full hover:bg-amber-300 transition-colors disabled:opacity-40 disabled:hover:bg-amber-400"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                      className="w-4 h-4"
-                    >
-                      <path d="M3.105 2.289a.75.75 0 00-.826.95l1.414 4.925A1.5 1.5 0 005.135 9.25h6.115a.75.75 0 010 1.5H5.135a1.5 1.5 0 00-1.442 1.086l-1.414 4.926a.75.75 0 00.826.95 28.896 28.896 0 0015.293-7.154.75.75 0 000-1.115A28.897 28.897 0 003.105 2.289z" />
-                    </svg>
-                  </button>
-                </div>
-              </div>
-
-              {/* Suggested Tags */}
-              {suggestedTags.length > 0 && (
-                <div className="mt-2 text-xs text-gray-400 px-1">
-                  Suggested tags:{" "}
-                  {suggestedTags.map((tag) => (
-                    <button
-                      key={tag}
-                      onClick={() =>
-                        setTagInput((prev) =>
-                          prev ? `${prev}, ${tag}` : tag
-                        )
-                      }
-                      className="text-amber-400 hover:text-amber-300 mr-2"
-                    >
-                      #{tag}
-                    </button>
-                  ))}
-                </div>
-              )}
+            {/* Textarea + send */}
+            <div className="relative">
+              <textarea
+                ref={textareaRef}
+                className="w-full p-4 pr-20 text-white resize-none bg-zinc-800 focus:outline-none rounded-xl min-h-[56px] max-h-[200px] text-sm placeholder:text-gray-500"
+                placeholder="Write your note here..."
+                rows={1}
+                value={input}
+                onChange={(e) => handleInputChange(e.target.value)}
+                onKeyDown={handleKeyDown}
+              />
+              <button
+                onClick={saveNote}
+                disabled={!input.trim()}
+                className="absolute right-2 bottom-2 p-2 bg-amber-400 text-black rounded-full hover:bg-amber-300 transition-colors disabled:opacity-50"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                  className="w-4 h-4"
+                >
+                  <path d="M3.105 2.289a.75.75 0 00-.826.95l1.414 4.925A1.5 1.5 0 005.135 9.25h6.115a.75.75 0 010 1.5H5.135a1.5 1.5 0 00-1.442 1.086l-1.414 4.926a.75.75 0 00.826.95 28.896 28.896 0 0015.293-7.154.75.75 0 000-1.115A28.897 28.897 0 003.105 2.289z" />
+                </svg>
+              </button>
             </div>
+
+            {/* Suggested tags */}
+            {suggestedTags.length > 0 && (
+              <div className="mt-2 text-xs text-gray-400">
+                Suggested tags:{" "}
+                {suggestedTags.map((tag) => (
+                  <button
+                    key={tag}
+                    onClick={() =>
+                      setTagInput((prev) =>
+                        prev ? `${prev}, ${tag}` : tag
+                      )
+                    }
+                    className="text-amber-400 hover:text-amber-300 mr-2"
+                  >
+                    #{tag}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>
     </div>
   )
 }
+
+
 
