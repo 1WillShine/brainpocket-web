@@ -1,93 +1,176 @@
 import { format } from "date-fns";
-import { useState } from "react";
-import type { Note } from "../types";
+import { useState, useRef, useEffect } from "react";
+import type { Note } from "../types/note"
+import { Trash2, CheckSquare } from 'lucide-react';
+import TaskModal from './TaskModal';
 
 interface NoteCardProps {
   note: Note;
-  onDelete: (id: string) => Promise<void>;
+  onDelete: (id: string) => void;
+  onUpdate: (id: string, updates: Partial<Note>) => void;
+  user: any;
 }
 
-export default function NoteCard({ note, onDelete }: NoteCardProps) {
+export default function NoteCard({ note, onDelete, onUpdate, user }: NoteCardProps) {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showTaskDeleteConfirm, setShowTaskDeleteConfirm] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+  const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
+  const deleteModalRef = useRef<HTMLDivElement>(null);
+  const taskDeleteModalRef = useRef<HTMLDivElement>(null);
 
-  const { id, content, tags, createdAt, type = "user" } = note;
+  const { id, content, tags, createdAt, type = "user", task } = note;
   const isUser = type === "user";
 
-  return (
-    <div 
-      className={`group relative w-full max-w-2xl mx-auto px-4 flex ${isUser ? "justify-end" : "justify-start"}`}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
-      {/* Delete Button */}
-      {isHovered && !showDeleteConfirm && (
-        <button
-          onClick={() => setShowDeleteConfirm(true)}
-          className="absolute -left-1 top-2 p-2 rounded-lg hover:bg-black/5 transition-colors z-20"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-4 w-4 text-gray-400 hover:text-red-500"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-          >
-            <path
-              fillRule="evenodd"
-              d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
-              clipRule="evenodd"
-            />
-          </svg>
-        </button>
-      )}
+  const handleTaskSave = (task: NonNullable<Note['task']>) => {
+    onUpdate(id, { task });
+  };
 
-      {/* Delete Confirmation */}
-      {showDeleteConfirm && (
-        <div className="absolute -left-1 top-2 bg-white rounded-lg shadow-lg p-3 z-30 border border-gray-200">
-          <p className="text-sm text-gray-600 mb-2">Delete this note?</p>
-          <div className="flex gap-2">
+  const handleTaskDelete = () => {
+    onUpdate(id, { task: null });
+    setShowTaskDeleteConfirm(false);
+  };
+
+  const handleTaskClick = () => {
+    if (task) {
+      setShowTaskDeleteConfirm(true);
+    } else {
+      setIsTaskModalOpen(true);
+    }
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (deleteModalRef.current && !deleteModalRef.current.contains(event.target as Node)) {
+        setShowDeleteConfirm(false);
+      }
+      if (taskDeleteModalRef.current && !taskDeleteModalRef.current.contains(event.target as Node)) {
+        setShowTaskDeleteConfirm(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  return (
+    <>
+      <div 
+        className={`group relative w-full max-w-xl mx-auto px-4 flex ${isUser ? "justify-end" : "justify-start"}`}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
+        {/* Controls */}
+        {isHovered && !showDeleteConfirm && (
+          <div className="absolute -left-1 top-2 flex flex-col gap-1 z-20">
             <button
-              onClick={async () => {
-                await onDelete(id);
-                setShowDeleteConfirm(false);
-              }}
-              className="px-3 py-1 bg-red-500 text-white text-sm rounded-md hover:bg-red-600"
+              onClick={() => setShowDeleteConfirm(true)}
+              className="p-2 rounded-lg hover:bg-black/5 transition-colors"
             >
-              Delete
+              <Trash2 size={16} className="text-gray-400 hover:text-red-500" />
             </button>
             <button
-              onClick={() => setShowDeleteConfirm(false)}
-              className="px-3 py-1 bg-gray-100 text-gray-600 text-sm rounded-md hover:bg-gray-200"
+              onClick={handleTaskClick}
+              className={`p-2 rounded-lg hover:bg-black/5 transition-colors ${
+                task ? 'text-amber-400 hover:text-amber-300' : 'text-gray-400 hover:text-amber-400'
+              }`}
             >
-              Cancel
+              <CheckSquare size={16} />
             </button>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Note Bubble */}
-      <div className={`rounded-2xl px-4 py-3 shadow ${isUser ? "bg-black text-white" : "bg-gray-100 text-gray-800"}`}>
-        <p className="text-[15px] leading-relaxed mb-3 whitespace-pre-wrap">{content}</p>
-
-        {tags.length > 0 && (
-          <div className="flex flex-wrap items-center gap-2 mt-2 border-t pt-2 border-white/10">
-            {tags.map((tag, idx) => (
-              <span
-                key={idx}
-                className={`px-2 py-0.5 rounded-md text-xs font-mono ${
-                  isUser ? "bg-amber-400/10 text-amber-400" : "bg-gray-200 text-gray-600"
-                }`}
+        {/* Delete Confirmation */}
+        {showDeleteConfirm && (
+          <div ref={deleteModalRef} className="absolute -left-1 top-2 bg-white rounded-lg shadow-lg p-3 z-30 border border-gray-200">
+            <p className="text-sm text-gray-600 mb-2">Delete this note?</p>
+            <div className="flex gap-2">
+              <button
+                onClick={() => {
+                  onDelete(id);
+                  setShowDeleteConfirm(false);
+                }}
+                className="px-3 py-1 bg-red-500 text-white text-sm rounded-md hover:bg-red-600"
               >
-                #{tag}
+                Delete
+              </button>
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                className="px-3 py-1 bg-gray-100 text-gray-600 text-sm rounded-md hover:bg-gray-200"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Note Bubble */}
+        <div className={`rounded-2xl px-4 py-3 shadow ${isUser ? "bg-black text-white" : "bg-gray-100 text-gray-800"}`}>
+          <p className="text-[15px] leading-relaxed mb-3 whitespace-pre-wrap">{content}</p>
+
+          <div className="flex flex-wrap items-center gap-2 mt-2 border-t pt-2 border-white/10">
+            {tags.length > 0 && (
+              <>
+                {tags.map((tag, idx) => (
+                  <span
+                    key={idx}
+                    className={`px-2 py-0.5 rounded-md text-xs font-mono ${
+                      isUser ? "bg-amber-400/10 text-amber-400" : "bg-gray-200 text-gray-600"
+                    }`}
+                  >
+                    #{tag}
+                  </span>
+                ))}
+              </>
+            )}
+            {task && (
+              <span className="text-xs text-amber-400 flex items-center gap-1">
+                <CheckSquare size={12} />
+                {format(new Date(task.dueDate), 'MMM d, yyyy')}
               </span>
-            ))}
+            )}
             <span className="text-xs text-gray-400 font-mono ml-auto">
               {format(createdAt, "HH:mm · MMM d, yyyy")}
             </span>
           </div>
-        )}
+        </div>
       </div>
-    </div>
+
+      <TaskModal
+        note={note}
+        isOpen={isTaskModalOpen}
+        onClose={() => setIsTaskModalOpen(false)}
+        onSave={handleTaskSave}
+      />
+
+      {/* Delete Task Confirmation Modal */}
+      {showTaskDeleteConfirm && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div ref={taskDeleteModalRef} className="bg-zinc-800 p-6 rounded-xl w-full max-w-md relative">
+            <h2 className="text-xl font-semibold text-white mb-4">
+              Delete Task
+            </h2>
+            <p className="text-gray-400 mb-6">
+              Are you sure you want to delete this task? This action cannot be undone.
+            </p>
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => setShowTaskDeleteConfirm(false)}
+                className="px-4 py-2 text-gray-400 hover:text-white transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleTaskDelete}
+                className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
 
