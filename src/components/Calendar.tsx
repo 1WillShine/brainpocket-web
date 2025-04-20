@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isToday, isSameDay, addMonths, subMonths } from 'date-fns';
 import { Note } from '../types/note';
 import { ChevronLeft, ChevronRight, X, Plus } from 'lucide-react';
-import TaskModal from './TaskModal';
+/*import TaskModal from './TaskModal';*/
 
 interface CalendarProps {
   notes: Note[];
@@ -95,10 +95,10 @@ export default function Calendar({ notes, selectedDate, onDateSelect, onNoteSele
     }
   };
 
-  const handleDeleteClick = (note: Note) => {
+  /*const handleDeleteClick = (note: Note) => {
     setTaskToDelete(note);
     setShowDeleteConfirm(true);
-  };
+  };*/
 
   const confirmDelete = () => {
     if (taskToDelete) {

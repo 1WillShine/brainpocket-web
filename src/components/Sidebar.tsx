@@ -1,6 +1,6 @@
 "use client"
 
-import { FileText, Tag, Bot, Search, Calendar as CalendarIcon, Home, MessageSquare, CheckSquare } from "lucide-react"
+import { /*FileText,*/ Tag,/* Bot,*/ Search, Calendar as CalendarIcon, Home, MessageSquare, CheckSquare } from "lucide-react"
 import { useState, useEffect } from "react"
 import Fuse from "fuse.js"
 
@@ -17,7 +17,7 @@ interface SidebarProps {
   onNoteSelect: (notes: any[]) => void
 }
 
-export default function Sidebar({ activeTab, onTabChange, notes, onSearch, onNoteSelect }: SidebarProps) {
+export default function Sidebar({ activeTab, onTabChange, notes, onSearch  /*,onNoteSelect */}: SidebarProps) {
   const [searchQuery, setSearchQuery] = useState("")
   const [fuse, setFuse] = useState<Fuse<any> | null>(null)
 

@@ -11,7 +11,7 @@ interface NoteCardProps {
   user: any;
 }
 
-export default function NoteCard({ note, onDelete, onUpdate, user }: NoteCardProps) {
+export default function NoteCard({ note, onDelete, onUpdate  /*, user */}: NoteCardProps) {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showTaskDeleteConfirm, setShowTaskDeleteConfirm] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
