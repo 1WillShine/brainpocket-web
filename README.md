@@ -62,7 +62,7 @@ BrainPocket is a full-stack productivity platform that enhances note-taking work
 Originally built as part of an applied software engineering project, BrainPocket integrates frontend UI/UX, backend APIs, relational databases, and an ETL analytics pipeline.
 
 ## 🚀 Features
-📚 Rich Note System**
+📚 Rich Note System
 
 Create, edit, delete notes
 
@@ -72,7 +72,7 @@ Filter by keyword, tag, date, or priority
 
 Auto-save and clean UI
 
-## 📅 Calendar–Integrated Workflow**
+## 📅 Calendar–Integrated Workflow
 
 Notes mapped to calendar events
 
@@ -80,7 +80,7 @@ Study-session scheduling
 
 Color-coded daily/weekly views
 
-## 🔎 Advanced Search**
+## 🔎 Advanced Search
 
 Multi-criteria filtering
 
@@ -88,7 +88,7 @@ Tag intersection search
 
 Natural-language processing (optional future extension)
 
-## 📊 Analytics Pipeline (Python + SQL)**
+## 📊 Analytics Pipeline (Python + SQL)
 
 Built a real analytics pipeline:
 
@@ -107,7 +107,7 @@ user engagement trends
 Outputs actionable UX recommendations
 
 ## 🛠️ Tech Stack
-Frontend**
+Frontend
 
 Next.js / React
 
@@ -137,7 +137,7 @@ Python (pandas, NumPy)
 
 ETL pipeline converting raw logs → analytic tables
 
-## 📂 Repository Structure**
+## 📂 Repository Structure
 backend/
     api/
     db/
@@ -148,7 +148,7 @@ README.md
 
 
 
-## 🧰 Setup Instructions**
+## 🧰 Setup Instructions
 Backend
 cd backend
 pip install -r requirements.txt
@@ -159,7 +159,7 @@ cd frontend
 npm install
 npm run dev
 
-## ✨ Future Enhancements**
+## ✨ Future Enhancements
 
 AI-assisted summarization
 
