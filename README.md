@@ -61,8 +61,8 @@ export default tseslint.config({
 BrainPocket is a full-stack productivity platform that enhances note-taking workflows with calendar-based organization, tag/category classification, multi-filter search, and data-driven analytics.
 Originally built as part of an applied software engineering project, BrainPocket integrates frontend UI/UX, backend APIs, relational databases, and an ETL analytics pipeline.
 
-**🚀 Features**
-📚 Rich Note System
+**🚀 Features
+📚 Rich Note System**
 
 Create, edit, delete notes
 
@@ -106,8 +106,8 @@ user engagement trends
 
 Outputs actionable UX recommendations
 
-**🛠️ Tech Stack**
-Frontend
+**🛠️ Tech Stack
+Frontend**
 
 Next.js / React
 
