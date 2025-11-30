@@ -171,3 +171,66 @@ export default tseslint.config({
   },
 })
 ```
+
+
+
+
+## Running Locally (Full Functionality)
+
+To enable full functionality, you must connect your own Firebase project.
+
+### 1. Create Firebase Project
+1. Visit the Firebase Console.
+2. Create a new project.
+3. Enable Firestore Database.
+
+### 2. Get Your Firebase Config
+In your project settings, copy the config:
+
+```ts
+const firebaseConfig = {
+  apiKey: "...",
+  authDomain: "...",
+  projectId: "...",
+  storageBucket: "...",
+  messagingSenderId: "...",
+  appId: "...",
+};
+```
+
+### 3. Add Firebase Setup File
+Create firebase.ts in your project:
+```ts
+import { initializeApp, getApps } from "firebase/app";
+import { getFirestore } from "firebase/firestore";
+import { getAuth } from "firebase/auth";
+
+const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
+
+export const db = getFirestore(app);
+export const auth = getAuth(app);
+```
+
+### 4. Firestore Rules
+```
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}
+```
+
+### 5. Add a .env.local File
+```
+NEXT_PUBLIC_FIREBASE_API_KEY=your_key
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_domain
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_project_id
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_bucket
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
+NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
+
+NEXT_PUBLIC_DEMO_MODE=false
+```
